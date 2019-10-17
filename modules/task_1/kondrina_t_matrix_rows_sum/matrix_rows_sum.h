@@ -5,8 +5,9 @@
 
 #include <valarray>
 
-std::valarray<int> rowsSumSeq(std::valarray<int> const matrix);
-std::valarray<int> rowsSum(std::valarray<int> const matrix);
-std::valarray<int> randomMatrix(int const cols, int const rows);
+std::valarray<int> rowsSum(std::valarray<int> const matrix,
+                           int const columns,
+                           int const rows);
+std::valarray<int> randomMatrix(int const columns, int const rows);
 
-#endif
+#endif  // MODULES_TASK_1_KONDRINA_T_MATRIX_ROWS_SUM_MATRIX_ROWS_SUM_H_

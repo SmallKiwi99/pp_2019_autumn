@@ -3,44 +3,79 @@
 #include <mpi.h>
 
 #include <valarray>
+#include <ctime>
+#include <random>
+#include <iostream>
 
-#include "./matrix_rows_sum.h"
-
-std::valarray<int> rowSumSeq(std::valarray<int> const matrix) {
-
-}
+#include "../../../modules/task_1/kondrina_t_matrix_rows_sum/matrix_rows_sum.h"
 
 std::valarray<int> rowsSum(std::valarray<int> const matrix,
-    int const rows, int const columns) {
+    int const columns, int const rows) {
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    const int __rowSendCount = columns;
-    int delta = rows / size,
-        remainder = rows % size;
-    if (rank == 0 && delta != 0) {
-        for (int currTurn = 0; currTurn < delta; ++currTurn) {
+    int delta = columns / size,
+        remainder = columns % size;
+    std::valarray<int> results(rows);
+
+    if (rank == 0) {
+        std::cout << std::endl << "D: " << delta << " R: " << remainder << std::endl;
+    }
+
+    for (int currRow = 0; currRow < rows; ++currRow) {
+        if (rank == 0 && delta > 0) {
             for (int process = 1; process < size; ++process) {
-                MPI_Send(&matrix[0] + process * delta, delta, )
+                MPI_Send(&matrix[0] + process * delta + currRow * columns + remainder,
+                         delta,
+                         MPI_INT,
+                         process,
+                         currRow,
+                         MPI_COMM_WORLD);
             }
         }
+
+        std::valarray<int> buffer(delta + remainder);
+        int rowSum = 0;
+
+        if (rank == 0) {
+            buffer = matrix[ std::slice(currRow * columns , delta + remainder, 1) ];
+            for (auto e : buffer) {
+                std::cout << e << " ";
+            }
+            std::cout << std::endl;
+        } else {
+            MPI_Recv(&buffer[0],
+                     delta,
+                     MPI_INT,
+                     0,
+                     currRow,
+                     MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+        }
+
+        rowSum = buffer.sum();
+
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Reduce(&rowSum,
+                   &results[currRow],
+                   1,
+                   MPI_INT,
+                   MPI_SUM,
+                   0,
+                   MPI_COMM_WORLD);
     }
 
-    std::valarray<int> localRow(delta);
-    if (rank == 0) {
-        localRow = ;
-    } else {
-        
-    }
+    return results;
+}
 
-    int sum = localRow.sum();
-    if (rank == 0) {
-        localRow.resize(rows);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+std::valarray<int> randomMatrix(int const columns, int const rows) {
+    std::srand((unsigned)std::time(NULL));
 
+    std::valarray<int> matrix(columns * rows);
+    matrix = matrix.apply([](int element) -> int {
+                                return element += std::rand() % 100;
+                         });
 
-
-    MPI_Reduce();
+    return matrix;
 }
