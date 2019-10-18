@@ -5,9 +5,19 @@
 #include <valarray>
 #include <ctime>
 #include <random>
-#include <iostream>
 
 #include "../../../modules/task_1/kondrina_t_matrix_rows_sum/matrix_rows_sum.h"
+
+std::valarray<int> rowsSumSeq(std::valarray<int> const matrix,
+    int const columns, int const rows) {
+        std::valarray<int> result(rows);
+
+        for (int currRow = 0; currRow < rows; ++currRow) {
+            result[currRow] = matrix[ std::slice(currRow * columns , columns, 1) ].sum();
+        }
+
+        return result;
+}
 
 std::valarray<int> rowsSum(std::valarray<int> const matrix,
     int const columns, int const rows) {
@@ -18,10 +28,6 @@ std::valarray<int> rowsSum(std::valarray<int> const matrix,
     int delta = columns / size,
         remainder = columns % size;
     std::valarray<int> results(rows);
-
-    if (rank == 0) {
-        std::cout << std::endl << "D: " << delta << " R: " << remainder << std::endl;
-    }
 
     for (int currRow = 0; currRow < rows; ++currRow) {
         if (rank == 0 && delta > 0) {
@@ -40,10 +46,6 @@ std::valarray<int> rowsSum(std::valarray<int> const matrix,
 
         if (rank == 0) {
             buffer = matrix[ std::slice(currRow * columns , delta + remainder, 1) ];
-            for (auto e : buffer) {
-                std::cout << e << " ";
-            }
-            std::cout << std::endl;
         } else {
             MPI_Recv(&buffer[0],
                      delta,
@@ -78,4 +80,17 @@ std::valarray<int> randomMatrix(int const columns, int const rows) {
                          });
 
     return matrix;
+}
+
+bool valarraysEquality(std::valarray<int> _leftArr, std::valarray<int> _rightArr) {
+    if (_leftArr.size() != _rightArr.size()) {
+        return false;
+    }
+
+    bool check = true;
+        for (int element = 0; element < static_cast<int>(_leftArr.size()); ++element) {
+            _leftArr[element] == _rightArr[element] ? check = true : check = false;
+        }
+
+    return check;
 }
