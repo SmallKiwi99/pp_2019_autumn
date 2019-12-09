@@ -50,7 +50,7 @@ std::vector<int> rowsSum(std::vector<int> const matrix, int const columns,
   rank == 0 ? index = remainder / columns : index = 0;
   MPI_Gather(&local_sums[index], delta / columns, MPI_INT, &buffer[0],
                delta / columns, MPI_INT, 0, MPI_COMM_WORLD);
-               
+
   if (rank == 0 && remainder != 0) {
     buffer.insert(buffer.begin(), local_sums.begin(),
                        local_sums.begin() + remainder / columns);
