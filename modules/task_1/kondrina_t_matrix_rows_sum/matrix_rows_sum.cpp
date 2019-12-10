@@ -4,6 +4,7 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <ctime>
 #include <numeric>
 #include <random>
