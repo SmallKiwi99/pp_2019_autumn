@@ -4,6 +4,7 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <ctime>
 #include <numeric>
 #include <random>
@@ -11,12 +12,12 @@
 
 std::vector<int> rowsSumSeq(std::vector<int> const matrix, int const columns,
                             int const rows) {
-  std::vector<int> result(rows);
+  std::vector<int> result;
 
   for (int currRow = 0; currRow < rows; ++currRow) {
-    result[currRow] =
-        std::accumulate(matrix.begin() + currRow * columns,
-                        matrix.begin() + currRow * columns + columns, 0);
+    result.push_back(
+        std::accumulate(matrix.begin() + (currRow * columns),
+                        matrix.begin() + (currRow * columns) + columns, 0));
   }
 
   return result;
@@ -32,8 +33,16 @@ std::vector<int> rowsSum(std::vector<int> const matrix, int const columns,
   std::vector<int> local_sums;
   std::vector<int> buffer(delta);
 
-  MPI_Scatter(&matrix[remainder], delta, MPI_INT, &buffer[0], delta, MPI_INT, 0,
-              MPI_COMM_WORLD);
+  if (delta != 0) {
+    if (rank == 0) {
+      MPI_Scatter(&matrix[remainder], delta, MPI_INT, &buffer[0], delta,
+                  MPI_INT, 0, MPI_COMM_WORLD);
+    } else {
+      MPI_Scatter(nullptr, 0, MPI_INT, &buffer[0], delta, MPI_INT, 0,
+                  MPI_COMM_WORLD);
+    }
+  }
+
   if (rank == 0 && remainder != 0) {
     buffer.insert(buffer.begin(), matrix.begin(), matrix.begin() + remainder);
   }
@@ -44,16 +53,18 @@ std::vector<int> rowsSum(std::vector<int> const matrix, int const columns,
 
   if (rank == 0) {
     buffer.clear();
-    buffer.resize(rows - remainder / columns);
+    buffer.resize(rows - (remainder / columns));
   }
 
-  rank == 0 ? index = remainder / columns : index = 0;
-  MPI_Gather(&local_sums[index], delta / columns, MPI_INT, &buffer[0],
+  if (delta != 0) {
+    rank == 0 ? index = remainder / columns : index = 0;
+    MPI_Gather(&local_sums[index], delta / columns, MPI_INT, &buffer[0],
                delta / columns, MPI_INT, 0, MPI_COMM_WORLD);
+  }
 
   if (rank == 0 && remainder != 0) {
     buffer.insert(buffer.begin(), local_sums.begin(),
-                       local_sums.begin() + remainder / columns);
+                  local_sums.begin() + (remainder / columns));
   }
 
   return buffer;

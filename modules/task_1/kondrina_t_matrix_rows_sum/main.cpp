@@ -38,7 +38,8 @@ TEST(Matrix_Rows_Sum_MPI, Test_Matrix_10x9) {
   result = rowsSum(testMatrix, columns, rows);
 
   if (rank == 0) {
-    ASSERT_EQ(result, rowsSumSeq(testMatrix, columns, rows));
+    std::vector<int> exp_result = rowsSumSeq(testMatrix, columns, rows);
+    ASSERT_EQ(result, exp_result);
   }
 }
 
@@ -57,7 +58,8 @@ TEST(Matrix_Rows_Sum_MPI, Test_Matrix_4x5) {
   result = rowsSum(testMatrix, columns, rows);
 
   if (rank == 0) {
-    ASSERT_EQ(result, rowsSumSeq(testMatrix, columns, rows));
+    std::vector<int> exp_result = rowsSumSeq(testMatrix, columns, rows);
+    ASSERT_EQ(result, exp_result);
   }
 }
 
@@ -76,7 +78,8 @@ TEST(Matrix_Rows_Sum_MPI, Test_Matrix_50x60) {
   result = rowsSum(testMatrix, columns, rows);
 
   if (rank == 0) {
-    ASSERT_EQ(result, rowsSumSeq(testMatrix, columns, rows));
+    std::vector<int> exp_result = rowsSumSeq(testMatrix, columns, rows);
+    ASSERT_EQ(result, exp_result);
   }
 }
 
@@ -95,7 +98,8 @@ TEST(Matrix_Rows_Sum_MPI, Test_Matrix_10x45) {
   result = rowsSum(testMatrix, columns, rows);
 
   if (rank == 0) {
-    ASSERT_EQ(result, rowsSumSeq(testMatrix, columns, rows));
+    std::vector<int> exp_result = rowsSumSeq(testMatrix, columns, rows);
+    ASSERT_EQ(result, exp_result);
   }
 }
 
